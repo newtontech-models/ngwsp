@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package ntx.core20;
+option csharp_namespace = "ntx20.api.proto";
+
+
+
+message Item {
+  string key = 1;
+
+  //oneof
+  string type = 2;
+  repeated Item m = 3;
+  string s = 4;
+  int64 i = 5;
+  float f = 6;
+  double d = 7;
+  Tensor t = 8;
+  bytes b = 9;
+  repeated string tags = 10;
+  map<string,string> labels = 11;
+  map<string,Item> props = 12;
+}
+
+
+
+message Error {
+  int64 code = 1;
+  string text = 2;
+  repeated Item meta = 3;
+}
+
+message TensorShape{
+  // -1 means any
+  repeated int64 shape = 1;
+}
+
+message Tensor {
+
+  //Data type, default = u1, options = u1|i1|i2|i4|i8|f2|f4|f8
+  string dtype = 1;
+
+  //default = [data.Size()/dtype.Size()]
+  TensorShape shape = 2;
+  bytes data = 3;
+  repeated Item meta = 4;
+}
+
+
+
+
+message Payload {
+    repeated Item chunk = 1;
+    string track = 2;
+}
+
+service EngineService {
+    rpc Streaming (stream Payload) returns (stream Payload);
+}
+
+

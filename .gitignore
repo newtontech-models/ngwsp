@@ -1,0 +1,42 @@
+# Build outputs
+bin/
+obj/
+
+# User-specific
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+
+# Rider
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# Test results
+TestResults/
+
+# Logs
+*.log
+
+playground/
+
+*:Zone.Identifier
+**/Properties/*.json
+**/*.env
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
