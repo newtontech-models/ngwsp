@@ -3,8 +3,9 @@
 This document describes the public WebSocket API exposed by the proxy server.
 
 Related documentation:
-- `docs/proxy.md` (proxy CLI options and env vars)
-- `docs/client.md` (client CLI options and lexicon file format)
+- [`docs/proxy.md`](proxy.md) (proxy CLI options and env vars)
+- [`docs/client.md`](client.md) (client CLI options and lexicon file format)
+- [`docs/client-implementation.md`](client-implementation.md) (client integration guidance)
 
 ## Endpoints
 

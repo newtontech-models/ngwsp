@@ -37,6 +37,8 @@ public static class Program
         var models = new Option<string?>("--models", "Comma-separated allowed models");
         var defaultModel = new Option<string?>("--default-model", "Default model name");
         var lexicon = new Option<string?>("--lexicon", "Lexicon preset/path/inline definition");
+        var uiWsUrl = new Option<string?>("--ui-ws-url", "UI WebSocket endpoint (ws://...)");
+        var audioBufferFrames = new Option<string?>("--audio-buffer-frames", "Max number of audio frames to buffer between WS receive and upstream gRPC write");
 
         var proxyCommand = new Command("proxy", "Run the WebSocket proxy server")
         {
@@ -53,7 +55,9 @@ public static class Program
             clientApiKey,
             models,
             defaultModel,
-            lexicon
+            lexicon,
+            uiWsUrl,
+            audioBufferFrames
         };
 
         proxyCommand.SetHandler(async context =>
@@ -74,7 +78,9 @@ public static class Program
                 result.GetValueForOption(clientApiKey),
                 result.GetValueForOption(models),
                 result.GetValueForOption(defaultModel),
-                result.GetValueForOption(lexicon));
+                result.GetValueForOption(lexicon),
+                result.GetValueForOption(uiWsUrl),
+                result.GetValueForOption(audioBufferFrames));
 
             if (string.IsNullOrWhiteSpace(options.GrpcTarget))
             {

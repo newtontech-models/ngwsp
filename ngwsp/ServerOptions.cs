@@ -16,7 +16,9 @@ public sealed record ServerOptions(
     string? ClientApiKey,
     string[] Models,
     string? DefaultModel,
-    string? Lexicon)
+    string? Lexicon,
+    string UiWsUrl,
+    int AudioBufferFrames)
 {
     public static ServerOptions Default() => new(
         ListenUrl: "http://0.0.0.0:8080",
@@ -32,5 +34,7 @@ public sealed record ServerOptions(
         ClientApiKey: "test_api_key",
         Models: Array.Empty<string>(),
         DefaultModel: null,
-        Lexicon: null);
+        Lexicon: null,
+        UiWsUrl: "ws://localhost:8080/ws",
+        AudioBufferFrames: 32);
 }

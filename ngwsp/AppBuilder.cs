@@ -47,6 +47,11 @@ public static class AppBuilder
         app.MapGet("/health/ready", () => Results.Ok(new { status = "ready" }));
         app.MapGet("/metrics", (MetricsStore metrics) => Results.Text(metrics.RenderPrometheus(), "text/plain"));
 
+        app.MapGet("/ui", () => Results.Text(UiAssets.GetText("index.html"), "text/html; charset=utf-8"));
+        app.MapGet("/ui/app.js", () => Results.Text(UiAssets.GetText("app.js"), "application/javascript; charset=utf-8"));
+        app.MapGet("/ui/app.css", () => Results.Text(UiAssets.GetText("app.css"), "text/css; charset=utf-8"));
+        app.MapGet("/ui/config.json", (ServerOptions options) => Results.Json(new { ws_url = options.UiWsUrl }));
+
         app.Map("/ws", async context =>
         {
             var proxy = context.RequestServices.GetRequiredService<WebSocketProxy>();

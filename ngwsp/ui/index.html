@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ngwsp /ui</title>
+  <link rel="stylesheet" href="/ui/app.css" />
+</head>
+<body>
+  <div class="bg-orbit"></div>
+  <header class="hero">
+    <div>
+      <p class="kicker">ngwsp</p>
+      <h1>Dictation UI</h1>
+      <p class="sub">WebSocket speech proxy, live capture, minimal UI.</p>
+    </div>
+    <div class="status-card" id="statusCard">
+      <div class="status-line">
+        <span class="label">Status</span>
+        <span class="value" id="connStatus">idle</span>
+      </div>
+      <div class="status-line">
+        <span class="label">WebSocket</span>
+        <span class="value" id="wsUrl"></span>
+      </div>
+      <div class="status-line">
+        <span class="label">Audio</span>
+        <span class="value" id="audioStatus">inactive</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel transcript" id="transcriptPanel">
+      <div class="panel-head">
+        <div>
+          <h2>Transcript</h2>
+          <p class="muted">Live dictation stream.</p>
+        </div>
+        <div class="actions">
+          <button id="toggleBtn" class="primary">Start</button>
+          <button id="sessionToggle" class="ghost" type="button">Session</button>
+          <button id="lexiconToggle" class="ghost" type="button">Lexicon</button>
+        </div>
+      </div>
+
+      <div class="top-row hidden" id="sessionPanel">
+        <div class="session-stack panel">
+          <div class="field">
+            <label for="model">Model</label>
+            <input id="model" type="text" placeholder="atran" />
+          </div>
+          <div class="field">
+            <label for="authType">Auth Type</label>
+            <select id="authType">
+              <option value="none">none</option>
+              <option value="header">header</option>
+              <option value="subprotocol">subprotocol</option>
+              <option value="query">query</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="apiKey">Login / API Key</label>
+            <input id="apiKey" type="password" placeholder="test_api_key" />
+          </div>
+          <div class="field">
+            <label for="micMode">Capture Mode</label>
+            <div class="pill">audio/webm; codecs=opus</div>
+          </div>
+          <div class="field">
+            <label for="verboseLog">Event Log</label>
+            <div class="event-controls">
+              <label class="toggle-inline">
+                <input id="verboseLog" type="checkbox" />
+                <span>Verbose</span>
+              </label>
+              <button id="clearLogBtn" class="ghost" type="button">Clear</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lexicon-overlay hidden" id="lexiconWrap">
+        <section class="panel lexicon" id="lexiconPanel">
+          <div class="panel-head">
+            <h2>Lexicon</h2>
+            <label class="toggle">
+              <input id="lexiconEnabled" type="checkbox" />
+              <span>Enabled</span>
+            </label>
+          </div>
+          <p class="muted">Format: <code>source: target</code> per line. Comments start with <code>#</code>.</p>
+          <div class="lexicon-editor">
+            <textarea id="lexiconText" rows="10" placeholder="acme: ACME"></textarea>
+            <pre class="lexicon-gutter" id="lexiconGutter" aria-hidden="true"></pre>
+          </div>
+          <div class="lexicon-errors" id="lexiconErrors"></div>
+          <div class="actions">
+            <button id="importBtn" class="ghost">Import</button>
+            <button id="exportBtn" class="ghost">Export</button>
+          </div>
+          <input id="lexiconFile" type="file" accept=".txt" hidden />
+        </section>
+      </div>
+
+      <div class="meta-row">
+        <div class="latency" id="latencyLine">Latency: --</div>
+        <div class="hint" id="errorBox"></div>
+      </div>
+
+      <div class="transcript-box" id="transcriptBox">
+        <span id="finalText"></span>
+        <span id="lookaheadText" class="lookahead-inline">waiting for connection</span>
+        <span id="cursor" class="cursor">_</span>
+      </div>
+      <div class="events" id="eventLog"></div>
+    </section>
+  </main>
+
+  <script src="/ui/app.js"></script>
+</body>
+</html>

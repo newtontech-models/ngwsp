@@ -3,6 +3,11 @@
 This document covers the `ngwsp proxy` command, its CLI options, and related
 environment variables.
 
+Related documentation:
+- [`docs/api.md`](api.md) (WebSocket API)
+- [`docs/client.md`](client.md) (client CLI options and lexicon file format)
+- [`docs/client-implementation.md`](client-implementation.md) (client integration guidance)
+
 ## Command
 
 ```bash
@@ -42,6 +47,10 @@ Required:
   - Default model name for clients.
 - `--lexicon`
   - Lexicon preset/path/inline definition (server-side default).
+- `--ui-ws-url`
+  - UI WebSocket endpoint (default: `ws://localhost:8080/ws`).
+- `--audio-buffer-frames`
+  - Max number of audio frames to buffer between WebSocket receive and upstream gRPC write (default: `32`).
 - `--env-file` (default: `.env`)
   - Path to a `.env` file (global option).
 
@@ -70,5 +79,7 @@ All variables are prefixed with `NGWSP_`:
 - `NGWSP_MODELS`
 - `NGWSP_DEFAULT_MODEL`
 - `NGWSP_LEXICON`
+- `NGWSP_UI_WS_URL`
+- `NGWSP_AUDIO_BUFFER_FRAMES`
 
 Additionally, `NG_MODELS` is accepted as an alias for `NGWSP_MODELS`.

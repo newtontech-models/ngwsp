@@ -23,4 +23,8 @@
     <Protobuf Include="..\\proto\\ntx\\core20\\engine.proto" GrpcServices="Both" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="ui/**" />
+  </ItemGroup>
+
 </Project>

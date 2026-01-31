@@ -1,6 +1,8 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using System.Buffers;
+using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 
 namespace ngwsp;
@@ -102,6 +104,11 @@ public sealed class WebSocketProxy
 
         foreach (var value in headerValues)
         {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                continue;
+            }
+
             foreach (var protocol in value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {
                 if (allowedKeys.Contains(protocol, StringComparer.Ordinal))
@@ -164,6 +171,8 @@ public sealed class WebSocketProxy
         IGrpcSpeechSession? session = null;
         InitConfig? initConfig = null;
         Task? upstreamTask = null;
+        Channel<byte[]>? audioFrames = null;
+        Task? audioForwardTask = null;
         using var sendLock = new SemaphoreSlim(1, 1);
         using var sessionCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
@@ -221,6 +230,21 @@ public sealed class WebSocketProxy
                         return;
                     }
 
+                    var audioBufferFrames = Math.Max(1, _options.AudioBufferFrames);
+                    audioFrames = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(audioBufferFrames)
+                    {
+                        SingleReader = true,
+                        SingleWriter = true,
+                        FullMode = BoundedChannelFullMode.Wait
+                    });
+
+                    audioForwardTask = ForwardAudioAsync(
+                        socket,
+                        session,
+                        audioFrames.Reader,
+                        sendLock,
+                        sessionCts.Token);
+
                     upstreamTask = ForwardTranscriptsAsync(socket, session, initConfig, selectedTrack, sendLock, sessionCts.Token);
                     initReceived = true;
                     continue;
@@ -241,6 +265,16 @@ public sealed class WebSocketProxy
 
                     if (message.Payload.Length == 0)
                     {
+                        if (audioFrames is not null)
+                        {
+                            audioFrames.Writer.TryComplete();
+                        }
+
+                        if (audioForwardTask is not null)
+                        {
+                            await audioForwardTask;
+                        }
+
                         if (session is not null)
                         {
                             await session.CompleteAsync(cancellationToken);
@@ -273,7 +307,16 @@ public sealed class WebSocketProxy
                         return;
                     }
 
-                    await session.SendAudioAsync(message.Payload, cancellationToken);
+                    if (audioFrames is null)
+                    {
+                        await SendErrorAsync(socket,
+                            new ProxyError(ErrorCodes.ProtocolError, "Audio buffer not initialized"),
+                            cancellationToken,
+                            sendLock);
+                        return;
+                    }
+
+                    await audioFrames.Writer.WriteAsync(message.Payload, sessionCts.Token);
                     continue;
                 }
             }
@@ -281,6 +324,24 @@ public sealed class WebSocketProxy
         finally
         {
             sessionCts.Cancel();
+
+            if (audioFrames is not null)
+            {
+                audioFrames.Writer.TryComplete();
+            }
+
+            if (audioForwardTask is not null)
+            {
+                try
+                {
+                    await audioForwardTask;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Audio forward task failed during shutdown");
+                }
+            }
+
             if (upstreamTask is not null)
             {
                 try
@@ -301,8 +362,10 @@ public sealed class WebSocketProxy
 
     private static async Task<WebSocketMessage> ReceiveMessageAsync(WebSocket socket, CancellationToken cancellationToken)
     {
-        var buffer = new byte[8192];
-        using var stream = new MemoryStream();
+        var buffer = ArrayPool<byte>.Shared.Rent(8192);
+        try
+        {
+            using var stream = new MemoryStream();
         WebSocketReceiveResult result;
 
         do
@@ -340,6 +403,38 @@ public sealed class WebSocketProxy
         while (!result.EndOfMessage);
 
         return new WebSocketMessage(result.MessageType, stream.ToArray());
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+    }
+
+    private async Task ForwardAudioAsync(
+        WebSocket socket,
+        IGrpcSpeechSession session,
+        ChannelReader<byte[]> audioFrames,
+        SemaphoreSlim sendLock,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await foreach (var frame in audioFrames.ReadAllAsync(cancellationToken))
+            {
+                await session.SendAudioAsync(frame, cancellationToken);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            await SendErrorAsync(socket,
+                new ProxyError(ErrorCodes.ProtocolError, $"Upstream error: {ex.Message}"),
+                CancellationToken.None,
+                sendLock);
+            throw;
+        }
     }
 
     private async Task SendFinishedAsync(WebSocket socket, CancellationToken cancellationToken, SemaphoreSlim sendLock)

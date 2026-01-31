@@ -1,0 +1,382 @@
+:root {
+  --bg: #111114;
+  --ink: #f4f1ea;
+  --muted: #c7c1b4;
+  --accent: #ffb347;
+  --accent-2: #5bd1ff;
+  --panel: rgba(23, 25, 32, 0.9);
+  --shadow: rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Trebuchet MS", "Verdana", sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at 20% 20%, #2b2f3a 0%, #111114 55%),
+    radial-gradient(circle at 80% 20%, rgba(91, 209, 255, 0.2), transparent 55%),
+    radial-gradient(circle at 20% 80%, rgba(255, 179, 71, 0.15), transparent 45%);
+  min-height: 100vh;
+  padding: 32px;
+}
+
+.bg-orbit {
+  position: fixed;
+  inset: -40% -20% auto auto;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: conic-gradient(from 120deg, rgba(91, 209, 255, 0.3), rgba(255, 179, 71, 0.1), transparent 70%);
+  filter: blur(0.5px);
+  opacity: 0.5;
+  animation: drift 18s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.kicker {
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-size: 12px;
+  margin: 0;
+  color: var(--accent-2);
+}
+
+h1 {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: clamp(2rem, 3vw, 3.3rem);
+  margin: 8px 0 6px;
+}
+
+.sub {
+  color: var(--muted);
+  margin: 0;
+}
+
+.status-card {
+  background: var(--panel);
+  border-radius: 18px;
+  padding: 16px 20px;
+  box-shadow: 0 20px 40px var(--shadow);
+  min-width: 280px;
+}
+
+.status-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+.status-line .label {
+  color: var(--muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+
+.panel {
+  background: var(--panel);
+  border-radius: 20px;
+  padding: 18px 20px;
+  box-shadow: 0 12px 32px var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: float-in 600ms ease forwards;
+}
+
+.panel:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.top-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 360px);
+  gap: 16px;
+  align-items: start;
+  position: absolute;
+  top: 96px;
+  right: 24px;
+  z-index: 10;
+}
+
+.top-row .panel {
+  box-shadow: 0 24px 48px var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.session-stack {
+  display: grid;
+  gap: 12px;
+  max-width: 360px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+label {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+}
+
+input,
+select,
+textarea {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: var(--ink);
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+textarea {
+  min-height: 160px;
+  resize: vertical;
+  font-family: "Consolas", "Courier New", monospace;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.event-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.toggle-inline {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: linear-gradient(120deg, var(--accent), #ff8c42);
+  color: #1b1206;
+  box-shadow: 0 12px 20px rgba(255, 179, 71, 0.25);
+}
+
+button.ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(91, 209, 255, 0.2);
+  color: var(--accent-2);
+  font-size: 12px;
+  width: fit-content;
+}
+
+.hint {
+  min-height: 18px;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.latency {
+  font-size: 13px;
+  color: var(--accent-2);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.transcript-box {
+  min-height: 180px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  line-height: 1.5;
+  font-size: 18px;
+}
+
+.lookahead-inline {
+  color: var(--accent-2);
+  opacity: 0.85;
+}
+
+.cursor {
+  display: inline-block;
+  margin-left: 6px;
+  animation: blinker 1s cubic-bezier(1, 0, 0, 1) infinite;
+}
+
+.events {
+  font-size: 12px;
+  color: var(--muted);
+  max-height: 120px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.hidden {
+  display: none;
+}
+
+.lexicon-overlay {
+  position: absolute;
+  top: 96px;
+  right: 24px;
+  z-index: 11;
+  width: min(420px, 90vw);
+}
+
+.panel.lexicon {
+  width: 100%;
+}
+
+.lexicon-editor {
+  position: relative;
+}
+
+.lexicon-editor textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  padding-right: 38px;
+}
+
+.lexicon-gutter {
+  position: absolute;
+  inset: 8px 10px 8px auto;
+  width: 24px;
+  margin: 0;
+  padding: 0;
+  text-align: right;
+  color: var(--accent);
+  font-size: 12px;
+  line-height: 1.4;
+  pointer-events: none;
+  white-space: pre;
+}
+
+.lexicon-errors {
+  font-size: 12px;
+  color: var(--accent);
+  min-height: 18px;
+}
+
+.panel.session-stack {
+  max-width: 360px;
+}
+
+.meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@keyframes float-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes blinker {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(18px) translateX(-12px);
+  }
+}
+
+@media (max-width: 720px) {
+  body {
+    padding: 20px;
+  }
+
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .top-row {
+    position: static;
+    grid-template-columns: 1fr;
+  }
+
+  .lexicon-overlay {
+    position: static;
+    width: 100%;
+  }
+}

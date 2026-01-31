@@ -425,7 +425,7 @@ Exit criteria:
 
 ---
 
-### Iteration 4 — Browser dictation UI
+### Iteration 4 — DONE: Browser dictation UI
 **Goal:** A working browser UI demonstrating the protocol and enabling quick manual verification.
 
 Implementation requirements:
@@ -434,6 +434,30 @@ Implementation requirements:
 - audio capture + streaming
 - transcript rendering
 - basic error handling and connection status
+ - serve at `GET /ui` (HTML + JS + CSS from embedded resources)
+ - capture audio via `MediaRecorder` with `audio/webm; codecs=opus`
+ - model is a free-text input
+ - lexicon editor in UI:
+   - enable/disable toggle
+   - edit rewrite rules
+   - import/export using proxy client file format (`source: target` per line)
+ - persist model, login, and lexicon to browser local storage
+- include a simple login/api key field (stored locally; sent via auth type selection)
+- keep assets minimal: no React/Angular or bundlers
+- on proxy startup, log important info:
+  - base HTTP URL
+  - WebSocket endpoint
+  - /ui endpoint
+  - health endpoints and metrics endpoint
+  - client auth mode and API key if auth enabled
+ - UI WebSocket endpoint is configurable via proxy option (default `ws://localhost:8080/ws`)
+ - UI shows latency estimate: local recording elapsed time minus `total_audio_proc_ms`
+
+Latency improvements (to match `ntx20` feel):
+- UI: avoid per-message heavy logging/DOM churn (verbose logging optional; bounded log)
+- Proxy: reduce head-of-line blocking by decoupling WebSocket receive from upstream gRPC writes using a bounded in-memory queue
+- Proxy: avoid any gRPC response-stream pre-read during session startup (do not consume the first upstream payload before transcript forwarding starts)
+- Proxy: make audio buffer capacity configurable (CLI + env) to tune latency vs backpressure
 
 Tests (minimum):
 - Integration: proxy serves the static UI assets (HTTP GET).
@@ -456,6 +480,9 @@ Implementation requirements:
 - `docs/client-implementation.md` complete with chunking/backpressure/reconnect guidance
 - compatibility statement is explicit and unambiguous
 - troubleshooting section added
+ - explicitly explain final vs non-final tokens and how UI rendering should handle them
+   (plain language, easy for non-experts to follow)
+ - include a Mermaid diagram illustrating final vs non-final rendering flow
 
 Tests (minimum):
 - Documentation build check if applicable (or lint for broken links)

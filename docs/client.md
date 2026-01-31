@@ -3,6 +3,11 @@
 This document describes the `ngwsp client` command, its CLI options, and the lexicon
 rewrite rules file format.
 
+Related documentation:
+- [`docs/api.md`](api.md) (WebSocket API)
+- [`docs/proxy.md`](proxy.md) (proxy CLI options and env vars)
+- [`docs/client-implementation.md`](client-implementation.md) (client integration guidance)
+
 ## Command
 
 ```bash

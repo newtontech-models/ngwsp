@@ -35,9 +35,10 @@ Auth (optional):
 
 ## Documentation
 
-- `docs/api.md` (WebSocket API)
-- `docs/proxy.md` (proxy CLI options and env vars)
-- `docs/client.md` (client CLI options and lexicon file format)
+- [`docs/api.md`](docs/api.md) (WebSocket API)
+- [`docs/proxy.md`](docs/proxy.md) (proxy CLI options and env vars)
+- [`docs/client.md`](docs/client.md) (client CLI options and lexicon file format)
+- [`docs/client-implementation.md`](docs/client-implementation.md) (client integration guidance)
 
 ## Defaults
 

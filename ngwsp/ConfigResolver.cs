@@ -21,7 +21,9 @@ public static class ConfigResolver
         string? clientApiKey,
         string? models,
         string? defaultModel,
-        string? lexicon)
+        string? lexicon,
+        string? uiWsUrl,
+        string? audioBufferFrames)
     {
         var defaults = ServerOptions.Default();
 
@@ -40,7 +42,9 @@ public static class ConfigResolver
             ClientApiKey = ResolveString(clientApiKey, Env("CLIENT_API_KEY"), defaults.ClientApiKey),
             Models = ResolveCsv(models, Env("MODELS") ?? EnvRaw("NG_MODELS"), defaults.Models),
             DefaultModel = ResolveString(defaultModel, Env("DEFAULT_MODEL"), defaults.DefaultModel),
-            Lexicon = ResolveString(lexicon, Env("LEXICON"), defaults.Lexicon)
+            Lexicon = ResolveString(lexicon, Env("LEXICON"), defaults.Lexicon),
+            UiWsUrl = ResolveString(uiWsUrl, Env("UI_WS_URL"), defaults.UiWsUrl) ?? defaults.UiWsUrl,
+            AudioBufferFrames = ResolveInt(audioBufferFrames, Env("AUDIO_BUFFER_FRAMES"), defaults.AudioBufferFrames) ?? defaults.AudioBufferFrames
         };
     }
 

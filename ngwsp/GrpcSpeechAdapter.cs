@@ -50,27 +50,6 @@ public sealed class GrpcSpeechAdapter : IGrpcSpeechAdapter
         var configPayload = GrpcConfigMapper.BuildConfigPayload(config);
         await call.RequestStream.WriteAsync(configPayload, cancellationToken);
 
-        try
-        {
-            await call.ResponseHeadersAsync;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to read gRPC response headers");
-        }
-
-        try
-        {
-            if (await call.ResponseStream.MoveNext(cancellationToken))
-            {
-                _ = call.ResponseStream.Current;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Failed to read gRPC config response");
-        }
-
         return new GrpcSpeechSession(call, _logger);
     }
 
