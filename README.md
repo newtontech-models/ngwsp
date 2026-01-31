@@ -7,7 +7,7 @@ WebSocket proxy for a gRPC Speech API with streaming mechanics and a custom Init
 1) Run the server
 
 ```bash
-dotnet run --project ngwsp -- proxy
+dotnet run --project ngwsp -- proxy --grpc-target https://usr:psw@xxx.yyy.zz
 ```
 
 2) Connect a WebSocket client to the proxy
