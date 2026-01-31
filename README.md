@@ -32,6 +32,11 @@ Auth (optional):
 - `--api-key <key>` (default: `test_api_key`)
   - When `--auth-type none`, the client does not send any API key.
 
+5) Test the browser UI (live dictation)
+
+- Start the proxy and open `http://localhost:8080/ui` in a web browser.
+- Click **Start**, allow microphone access, and speak to verify live transcription.
+
 
 ## Documentation
 
