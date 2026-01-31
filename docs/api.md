@@ -84,6 +84,34 @@ Notes:
 - `tokens` entries may include `nonspeech: true` for noise tokens.
 - Lookahead tokens are represented with `is_final: false`.
 
+## Final vs Non-Final Tokens (Rendering Guidance)
+
+Plain-language meaning:
+- **Final tokens** are confirmed words. Once you render them, they should stay forever.
+- **Non-final tokens** (lookahead) are tentative. Render them only as a temporary overlay.
+- When new final tokens arrive, append them to the permanent transcript and **clear** the non-final overlay.
+
+Simple rendering rule:
+1) Keep `final_text` (permanent).
+2) Keep `lookahead_text` (temporary).
+3) On each message:
+   - append any `is_final=true` token text to `final_text`
+   - replace `lookahead_text` with any `is_final=false` token text
+4) Render as: `final_text + lookahead_text`
+
+### Mermaid Diagram
+
+```mermaid
+flowchart TD
+  A[Incoming transcript message] --> B{Has tokens?}
+  B -- No --> Z[Render final_text + lookahead_text unchanged]
+  B -- Yes --> C[Split tokens by is_final]
+  C --> D[Append final tokens to final_text]
+  C --> E[Replace lookahead_text with non-final tokens]
+  D --> F[Render final_text + lookahead_text]
+  E --> F
+```
+
 ## Finished Message
 
 ```json
@@ -123,3 +151,9 @@ Compatible:
 
 Different:
 - InitConfig schema is custom (model/lexicon).
+
+## Troubleshooting (Quick)
+
+- `protocol_error`: InitConfig missing/late or extra text frames.
+- `invalid_init_config`: required fields missing or invalid.
+- `buffer_overflow`: upstream not ready; reduce chunk size or retry later.

@@ -39,6 +39,7 @@ Auth (optional):
 - [`docs/proxy.md`](docs/proxy.md) (proxy CLI options and env vars)
 - [`docs/client.md`](docs/client.md) (client CLI options and lexicon file format)
 - [`docs/client-implementation.md`](docs/client-implementation.md) (client integration guidance)
+- [`docs/agent-client-howto.md`](docs/agent-client-howto.md) (agent/robot client quickstart)
 
 ## Defaults
 

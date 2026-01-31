@@ -7,6 +7,7 @@ Related documentation:
 - [`docs/api.md`](api.md) (WebSocket API)
 - [`docs/proxy.md`](proxy.md) (proxy CLI options and env vars)
 - [`docs/client-implementation.md`](client-implementation.md) (client integration guidance)
+- [`docs/agent-client-howto.md`](agent-client-howto.md) (agent/robot quickstart)
 
 ## Command
 

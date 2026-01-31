@@ -470,7 +470,7 @@ Exit criteria:
 
 ---
 
-### Iteration 5 — Documentation + polish (API + client implementer guidance)
+### Iteration 5 — DONE: Documentation + polish (API + client implementer guidance)
 **Goal:** Documentation is complete enough that:
 - end users can integrate
 - another agent can implement clients reliably
