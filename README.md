@@ -45,6 +45,7 @@ Auth (optional):
 - [`docs/client.md`](docs/client.md) (client CLI options and lexicon file format)
 - [`docs/client-implementation.md`](docs/client-implementation.md) (client integration guidance)
 - [`docs/agent-client-howto.md`](docs/agent-client-howto.md) (agent/robot client quickstart)
+- [`docs/agentic-development-cheatsheet.md`](docs/agentic-development-cheatsheet.md) (beginner guide for agentic workflow with examples)
 
 ## Defaults
 

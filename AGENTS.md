@@ -213,4 +213,68 @@ If you are an AI assistant:
   - DO NOT implement feature work
 - If the requested change affects runtime behavior:
   - refuse and ask to update the plan instead
- 
+
+## 14. Bugs and New Features (Mandatory Rules)
+
+### Bug Handling
+
+- A bug is a defect in EXISTING, PLANNED behavior.
+
+There are two categories:
+
+#### Minor bug
+Definition:
+- localized fix
+- no change to protocol, architecture, or scope
+
+Rules:
+- May be implemented WITHOUT updating PLAN.md
+- MUST include a regression test
+- MUST NOT introduce new features or refactors
+
+If unsure whether a bug is minor:
+- treat it as significant
+
+#### Significant bug
+Definition:
+- affects protocol behavior
+- affects streaming semantics, buffering, error handling
+- requires design trade-offs or architectural decisions
+
+Rules:
+- STOP
+- Propose a plan update or a new iteration
+- Do NOT implement until PLAN.md is updated and approved
+
+---
+
+### New Feature Handling
+
+- Any new feature ALWAYS requires a plan change.
+
+Definition of a feature:
+- new capability
+- new option or configuration
+- new protocol field
+- new behavior observable by clients
+
+Rules:
+- Do NOT implement new features directly
+- Propose:
+  - plan update OR
+  - new iteration
+- Wait for explicit plan approval
+- After approval:
+  - update PLAN.md
+  - validate plan
+  - then implement
+
+---
+
+### Tests Requirement
+
+- Every bug fix MUST include a regression test.
+- Every feature MUST include tests validating the new behavior.
+- If tests cannot be added:
+  - explain why
+  - ask for approval to proceed without tests
