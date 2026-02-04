@@ -222,6 +222,11 @@ If you are an AI assistant:
 - If the requested change affects runtime behavior:
   - refuse and ask to update the plan instead
 
+## 13.1 Out-of-Plan on `main` (Mandatory)
+
+- When doing out-of-plan changes directly on `main`, do **NOT** create any commit unless the user explicitly confirms they want a commit.
+- Always ask for confirmation before running `git commit` for out-of-plan work.
+
 ## 14. Bugs and New Features (Mandatory Rules)
 
 ### Bug Handling
