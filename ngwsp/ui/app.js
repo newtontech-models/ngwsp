@@ -314,11 +314,11 @@ function openSocket(authType) {
     const protocols = [];
 
     if (authType === "query" && state.settings.apiKey) {
-      url = `${url}?api_key=${encodeURIComponent(state.settings.apiKey)}`;
+      url = `${url}?authorization=${encodeURIComponent(state.settings.apiKey)}`;
     }
 
     if (authType === "subprotocol" && state.settings.apiKey) {
-      protocols.push(state.settings.apiKey);
+      protocols.push(encodeURIComponent(state.settings.apiKey));
     }
 
     const socket = new WebSocket(url, protocols.length ? protocols : undefined);

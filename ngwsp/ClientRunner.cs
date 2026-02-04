@@ -1,4 +1,5 @@
 using System.Net.WebSockets;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -77,7 +78,17 @@ public static class ClientRunner
             return 1;
         }
 
-        await socket.ConnectAsync(proxyUri, cancellationToken);
+        try
+        {
+            await socket.ConnectAsync(proxyUri, cancellationToken);
+        }
+        catch (Exception ex) when (ex is WebSocketException or HttpRequestException)
+        {
+            var connectError = FormatConnectFailure(ex);
+            Console.Error.WriteLine(connectError);
+            Logger?.LogWarning(ex, "WebSocket connect failed: {Error}", connectError);
+            return 1;
+        }
 
         var initPayload = BuildInitConfig(options.Model, lexicon);
         var initBytes = Encoding.UTF8.GetBytes(initPayload);
@@ -94,6 +105,71 @@ public static class ClientRunner
         await outputWriter.DisposeAsync();
         Logger?.LogInformation("Client session finished with code {ExitCode}", exitCode);
         return exitCode;
+    }
+
+    private static string FormatConnectFailure(Exception exception)
+    {
+        if (TryFindHttpStatus(exception, out var status))
+        {
+            if (status == HttpStatusCode.Unauthorized || status == HttpStatusCode.Forbidden)
+            {
+                return $"Proxy rejected the WebSocket upgrade ({(int)status} {status}). Check your API key and auth type.";
+            }
+
+            return $"Proxy rejected the WebSocket upgrade ({(int)status} {status}).";
+        }
+
+        var message = exception.Message?.Trim();
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            message = exception.GetType().Name;
+        }
+
+        return $"WebSocket connect failed: {message}";
+    }
+
+    private static bool TryFindHttpStatus(Exception exception, out HttpStatusCode status)
+    {
+        status = default;
+
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            if (current is HttpRequestException http && http.StatusCode is not null)
+            {
+                status = http.StatusCode.Value;
+                return true;
+            }
+
+            var message = current.Message;
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                continue;
+            }
+
+            // Common .NET ClientWebSocket failure format:
+            // "The server returned status code '401' when status code '101' was expected."
+            var idx = message.IndexOf("status code '", StringComparison.OrdinalIgnoreCase);
+            if (idx < 0)
+            {
+                continue;
+            }
+
+            idx += "status code '".Length;
+            var end = message.IndexOf('\'', idx);
+            if (end <= idx)
+            {
+                continue;
+            }
+
+            var codePart = message[idx..end];
+            if (int.TryParse(codePart, out var code) && Enum.IsDefined(typeof(HttpStatusCode), code))
+            {
+                status = (HttpStatusCode)code;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static bool TryConfigureAuth(
@@ -139,7 +215,7 @@ public static class ClientRunner
             case "none":
                 return true;
             case "header":
-                socket.Options.SetRequestHeader("Authorization", $"Bearer {options.ApiKey}");
+                socket.Options.SetRequestHeader("Authorization", options.ApiKey);
                 return true;
             case "subprotocol":
                 socket.Options.AddSubProtocol(options.ApiKey);
@@ -148,7 +224,7 @@ public static class ClientRunner
                 var builder = new UriBuilder(baseUri);
                 var query = builder.Query;
                 var prefix = string.IsNullOrWhiteSpace(query) ? string.Empty : query.TrimStart('?') + "&";
-                builder.Query = $"{prefix}api_key={Uri.EscapeDataString(options.ApiKey)}";
+                builder.Query = $"{prefix}authorization={Uri.EscapeDataString(options.ApiKey)}";
                 proxyUri = builder.Uri;
                 return true;
             default:

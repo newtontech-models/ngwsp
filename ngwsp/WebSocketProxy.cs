@@ -80,12 +80,12 @@ public sealed class WebSocketProxy
             return false;
         }
 
-        if (TryMatchBearerHeader(context.Request.Headers, allowedKeys, out var headerKey))
+        if (TryMatchAuthorizationHeader(context.Request.Headers, allowedKeys, out var headerKey))
         {
             return true;
         }
 
-        if (context.Request.Query.TryGetValue("api_key", out var queryValue))
+        if (context.Request.Query.TryGetValue("authorization", out var queryValue))
         {
             foreach (var value in queryValue)
             {
@@ -111,7 +111,13 @@ public sealed class WebSocketProxy
 
             foreach (var protocol in value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {
-                if (allowedKeys.Contains(protocol, StringComparer.Ordinal))
+                var decoded = TryDecodeProtocol(protocol);
+                if (decoded is null)
+                {
+                    continue;
+                }
+
+                if (allowedKeys.Contains(decoded, StringComparer.Ordinal))
                 {
                     selectedSubProtocol = protocol;
                     return true;
@@ -123,7 +129,7 @@ public sealed class WebSocketProxy
         return false;
     }
 
-    private static bool TryMatchBearerHeader(IHeaderDictionary headers, string[] allowedKeys, out string? key)
+    private static bool TryMatchAuthorizationHeader(IHeaderDictionary headers, string[] allowedKeys, out string? key)
     {
         key = null;
         if (!headers.TryGetValue("Authorization", out var authValues))
@@ -139,20 +145,41 @@ public sealed class WebSocketProxy
                 continue;
             }
 
-            if (!trimmed.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            if (allowedKeys.Contains(trimmed, StringComparer.Ordinal))
             {
-                continue;
+                key = trimmed;
+                return true;
             }
 
-            var candidate = trimmed[7..].Trim();
-            if (allowedKeys.Contains(candidate, StringComparer.Ordinal))
+            if (trimmed.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
             {
-                key = candidate;
-                return true;
+                var candidate = trimmed[7..].Trim();
+                if (allowedKeys.Contains(candidate, StringComparer.Ordinal))
+                {
+                    key = candidate;
+                    return true;
+                }
             }
         }
 
         return false;
+    }
+
+    private static string? TryDecodeProtocol(string protocol)
+    {
+        if (string.IsNullOrWhiteSpace(protocol))
+        {
+            return null;
+        }
+
+        try
+        {
+            return Uri.UnescapeDataString(protocol);
+        }
+        catch (UriFormatException)
+        {
+            return null;
+        }
     }
 
     private static string[] ParseApiKeys(string? value)

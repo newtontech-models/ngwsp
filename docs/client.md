@@ -54,9 +54,9 @@ Required:
 ## Auth Behavior
 
 - `--auth-type none` sends no API key.
-- `--auth-type header` uses `Authorization: Bearer <key>`.
-- `--auth-type subprotocol` sends the key via `Sec-WebSocket-Protocol`.
-- `--auth-type query` appends `?api_key=<key>` to the URL.
+- `--auth-type header` uses `Authorization: <key>` (raw API key).
+- `--auth-type subprotocol` sends the URI-escaped key via `Sec-WebSocket-Protocol` (the proxy decodes before comparing).
+- `--auth-type query` appends `?authorization=<key>` to the URL.
 
 ## Lexicon Rewrite Rules File Format (Required for `--lexicon`)
 
