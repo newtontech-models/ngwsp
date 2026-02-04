@@ -19,9 +19,9 @@ Related documentation:
 
 - WSS is recommended. TLS may be terminated by a reverse proxy or configured in-process (TBD).
 - Client auth is optional: when enabled (`--client-auth-mode api_key`), clients must pass the API key using one of:
-  - `Authorization: Bearer <key>`
-  - `Sec-WebSocket-Protocol: <key>`
-  - `?api_key=<key>`
+  - `Authorization: <key>`
+  - `Sec-WebSocket-Protocol: <key>` (URI-escaped; proxy decodes before comparing)
+  - `?authorization=<key>`
   By default, no auth is required.
 
 ## Connection Lifecycle

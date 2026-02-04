@@ -411,7 +411,7 @@ Implementation requirements:
 - emit transcript events as JSONL to stdout
 - respect InitConfig schema (model/lexicon)
 - enforce WebSocket API key auth when `--client-auth-mode api_key` (reject handshake before gRPC if missing/invalid `Sec-WebSocket-Protocol`)
-- support API key auth variants for proxy + client (`Authorization: Bearer <key>`, `Sec-WebSocket-Protocol`, and `?api_key=<key>`)
+- support API key auth variants for proxy + client (`Authorization: <key>` or `Authorization: Bearer <key>`, `Sec-WebSocket-Protocol`, and `?authorization=<key>`)
 - set auth defaults: proxy `client-auth-mode=none`, `client-api-key=test_api_key`; client `auth-type=none`, `api-key=test_api_key` (no auth sent unless auth-type is not `none`)
 
 Tests (minimum):
@@ -494,6 +494,47 @@ Tests (minimum):
 Exit criteria:
 - docs reviewed for completeness and clarity
 - CI green, no flaky tests
+
+---
+
+### Iteration 6 — DONE: Client auth header uses raw API key (no `Bearer `)
+**Bug:** `--auth-type header` currently sends `Authorization: Bearer <api_key>`, but the desired behavior is `Authorization: <api_key>` (raw key only).
+
+Expected branch:
+- `iter6-auth-header-raw-api-key`
+
+Behavior changes:
+- Client: `--auth-type header` sends `Authorization: <api_key>` (raw key).
+- Proxy: accept `Authorization: <api_key>` as a valid API key.
+- Backward compatibility: continue accepting `Authorization: Bearer <api_key>` for now (deprecated), to avoid breaking existing clients.
+- Client UX: when the WebSocket upgrade is rejected (e.g., invalid API key → HTTP 401), print a clear error message and exit non-zero (instead of failing silently / unhandled exception).
+- Query auth: when auth is provided via query string, the parameter name is `authorization` (i.e., `?authorization=<key>`). `api_key` is not accepted.
+- Subprotocol auth: client sends the API key as a URI-escaped `Sec-WebSocket-Protocol` token; proxy URI-decodes subprotocol values before comparing against the configured raw API key(s).
+
+Implementation requirements:
+- Update `ngwsp client` header auth to send raw key.
+- Update proxy authorization parsing to accept raw `Authorization` values in addition to the existing Bearer format.
+- Update docs to state header auth is raw API key (and mark Bearer form as deprecated if referenced).
+- Update `ngwsp client` to catch WebSocket connect failures and surface the likely HTTP status (at minimum: Unauthorized/Forbidden).
+- Update proxy/client/UI/docs to use `?authorization=<key>` for query auth.
+- Update `ngwsp client` subprotocol auth to send a URI-escaped key.
+- Update proxy to URI-decode candidate `Sec-WebSocket-Protocol` values before API key comparison (while returning the original selected subprotocol string in the handshake).
+
+Tests (minimum):
+- Integration: header auth succeeds with `Authorization: <api_key>`.
+- Integration: header auth succeeds with `Authorization: Bearer <api_key>` (compat).
+- Integration: header auth fails with wrong key (both formats).
+- Integration: `ngwsp client` prints an error message and exits non-zero when the proxy rejects the upgrade (wrong API key).
+- Integration: query auth succeeds with `?authorization=<key>`.
+- Integration: query auth fails when using `?api_key=<key>`.
+- Integration: subprotocol auth succeeds with an API key that contains reserved characters when the client sends the URI-escaped value.
+
+Exit criteria:
+- `ngwsp.tests` cover both header formats.
+- Docs match the implemented behavior.
+- Invalid API key produces a clear client-side error message.
+- Query auth uses only `authorization` parameter.
+- Subprotocol auth supports reserved characters via URI-escaping/decoding.
 
 ---
 

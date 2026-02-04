@@ -75,8 +75,8 @@ for msg in ws:
 ## Auth Notes (Automated Clients)
 
 If proxy auth is enabled (`--client-auth-mode api_key`), send the API key using one of:
-- `Authorization: Bearer <key>`
-- `Sec-WebSocket-Protocol: <key>`
-- `?api_key=<key>`
+- `Authorization: <key>`
+- `Sec-WebSocket-Protocol: <key>` (URI-escaped; proxy decodes before comparing)
+- `?authorization=<key>`
 
 Pick exactly one method for a given client.
