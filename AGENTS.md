@@ -184,6 +184,14 @@ If you are an AI assistant:
   - Propose the exact git command(s) needed to switch/create the correct branch.
 - Never switch branches or create branches unless explicitly instructed.
 
+## 11.1 Merge Policy (Mandatory)
+
+- All merges to `main` MUST be **squash merges** (one commit).
+- Do NOT create merge commits into `main`.
+- If the user asks to “merge to main”, prefer:
+  - `git merge --squash <branch>` followed by a single commit, or
+  - an equivalent squash workflow the user prefers.
+
 ## 12. .gitignore Rules (Mandatory)
 
 - The `.gitignore` file is the authoritative source for ignored files.
