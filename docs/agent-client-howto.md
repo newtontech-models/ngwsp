@@ -5,6 +5,7 @@ This is a short, explicit guide for building an automated client (bot/agent/robo
 Related documentation:
 - [`docs/api.md`](api.md) (full protocol schema)
 - [`docs/client-implementation.md`](client-implementation.md) (implementation details and gotchas)
+- [`docs/universal-agent-prompt.md`](universal-agent-prompt.md) (prompt template for other coding agents)
 
 ## Minimum Viable Flow
 
