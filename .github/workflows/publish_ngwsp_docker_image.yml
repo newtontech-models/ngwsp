@@ -9,7 +9,7 @@ on:
 jobs:
   publish-ngwsp:
     name: Publish NGWSP
-    uses: newtontechnologies/denv-github-actions/.github/workflows/publish_docker_image.yml@main
+    uses: ./.github/workflows/publish_docker_image.yml@main
     with:
       dockerfile_path: Dockerfile
       image_name: ngwsp
