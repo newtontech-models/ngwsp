@@ -7,7 +7,7 @@ on:
 jobs:
   enforce_docker_retention_policy:
     name: Enforce Docker retention policy
-    uses: ./.github/workflows/enforce_docker_retention_policy.yml@main
+    uses: ./.github/workflows/enforce_docker_retention_policy.yml
     with:
       image_names: >
         ngwsp
