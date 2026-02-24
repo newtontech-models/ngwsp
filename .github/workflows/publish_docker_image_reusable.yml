@@ -1,0 +1,100 @@
+name: Publish Docker image
+
+on:
+  workflow_call:
+    inputs:
+      dockerfile_path:
+        description: The path of the Dockerfile
+        type: string
+        required: true
+      image_name:
+        description: The tag name of the image
+        type: string
+        required: true
+      custom_build_args:
+        description: Newline-separated KEY=VALUE entries for custom Docker build args
+        type: string
+        required: false
+      extra_tags:
+        description: Newline-separated extra Docker tags
+        type: string
+        required: false
+      lfs:
+        description: Pull Git LFS files
+        type: string
+        required: false
+        default: false
+      checkout_ref:
+        description: Optional git ref to checkout (branch, tag, or SHA)
+        type: string
+        required: false
+        default: ""
+    secrets:
+      repository_checkout_token:
+        description: The token with which to checkout the repository and submodules
+        required: true
+      container_registry_token:
+        description: The token with which to login to the Github Docker registry
+        required: true
+      package_registry_token:
+        description: The token with which to login to the Github package registry
+        required: false
+
+jobs:
+  publish_docker_image:
+    name: Publish Docker image
+    runs-on: [self-hosted, general-purpose]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        lfs: ${{ inputs.lfs }}
+        ref: ${{ inputs.checkout_ref || github.sha }}
+        submodules: recursive
+        token: ${{ secrets.repository_checkout_token }}
+
+    - name: Login to Github Docker registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.container_registry_token }}
+
+    - name: Setup docker build
+      uses: docker/setup-buildx-action@v3
+
+    - name: Hash the package registry secret
+      id: hash_package_registry_token
+      run: |
+        MESSAGE="package_registry_token"
+        DIGEST="$(printf '%s' "$MESSAGE" | \
+          openssl dgst -sha256 -hmac "${{ secrets.PACKAGE_REGISTRY_TOKEN }}" -binary | \
+          xxd -p -c 256)"
+        echo "digest=$DIGEST" >> "$GITHUB_OUTPUT"
+
+    - name: Setup Docker metadata
+      id: docker_metadata
+      uses: docker/metadata-action@v5
+      with:
+        images: ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}
+        tags: |
+          type=raw,value=latest
+          type=raw,value=${{ inputs.extra_tags }},enable=${{ inputs.extra_tags != '' }},sep=\n
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ${{ inputs.dockerfile_path }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        push: true
+        load: true
+        provenance: false
+        tags: ${{ steps.docker_metadata.outputs.tags }}
+        build-args: |
+          PACKAGE_REGISTRY_USERNAME=${{ github.repository_owner }}
+          CACHE_BUST=${{ steps.hash_package_registry_token.outputs.digest }}
+          COMMIT_HASH=${{ github.sha }}
+          ${{ inputs.custom_build_args }}
+        secrets: PACKAGE_REGISTRY_TOKEN=${{ secrets.package_registry_token }}
