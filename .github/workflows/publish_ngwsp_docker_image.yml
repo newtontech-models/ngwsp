@@ -9,7 +9,7 @@ on:
 jobs:
   publish-ngwsp:
     name: Publish NGWSP
-    uses: ./.github/workflows/publish_docker_image.yml
+    uses: ./.github/workflows/publish_docker_image_reusable.yml
     with:
       dockerfile_path: Dockerfile
       image_name: ngwsp

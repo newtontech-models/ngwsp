@@ -1,0 +1,36 @@
+name: Enforce Docker retention policy
+
+on:
+  workflow_call:
+    inputs:
+      image_names:
+        description: The space separated image names to enforce the policy on
+        type: string
+        required: true
+      cut_off_age:
+        description: The humantime crate age after which an image is considered for deletion
+        type: string
+        required: false
+      keep_n_most_recent:
+        description: How many most recent tagged images to always keep
+        type: number
+        required: false
+    secrets:
+      container_registry_token:
+        description: The token with which to login to the Github Docker registry
+        required: true 
+
+jobs:
+  enforce_docker_retention_policy:
+    name: Enforce Docker retention policy
+    runs-on: [self-hosted, general-purpose]
+    steps:
+    - name: Enforce Docker retention policy
+      uses: snok/container-retention-policy@v3.0.0
+      with:
+        account: ${{ github.repository_owner }}
+        token: ${{ secrets.container_registry_token }}
+        image-names: ${{ inputs.image_names }}
+        cut-off: ${{ inputs.cut_off_age == '' && '60d' || inputs.cut_off_age }}
+        keep-n-most-recent: ${{ inputs.keep_n_most_recent == '' && 1 || inputs.keep_n_most_recent }}
+        dry-run: false
