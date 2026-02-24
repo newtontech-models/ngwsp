@@ -23,7 +23,7 @@ on:
 jobs:
   enforce_docker_retention_policy:
     name: Enforce Docker retention policy
-    runs-on: [self-hosted, general-purpose]
+    runs-on: ubuntu-latest
     steps:
     - name: Enforce Docker retention policy
       uses: snok/container-retention-policy@v3.0.0

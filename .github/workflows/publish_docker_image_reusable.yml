@@ -43,7 +43,7 @@ on:
 jobs:
   publish_docker_image:
     name: Publish Docker image
-    runs-on: [self-hosted, general-purpose]
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
